@@ -2,6 +2,7 @@
 #define CAM_H
 
 #include <stdlib.h>
+#include <gc.h>
 
 struct pair{
     void* first;

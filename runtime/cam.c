@@ -5,7 +5,7 @@ void quote_val(void* v){
     gStackTop->v = v;
 }
 void quote_int(int v){
-    int* intp = malloc(sizeof(int));
+    int* intp = GC_MALLOC_ATOMIC(sizeof(int));
     *intp = v;
     gStackTop->v = intp;
 }
@@ -17,7 +17,7 @@ void cdr(){
 }
 void cons(){
     struct pair* p;
-    p = (struct pair*) malloc(sizeof(struct pair));
+    p = (struct pair*) GC_MALLOC(sizeof(struct pair));
     p->first = gStackTop->next->v;
     p->second = gStackTop->v;
     gStackTop = gStackTop->next;
@@ -25,7 +25,7 @@ void cons(){
 }
 void push(){
     struct stack_item* p;
-    p = (struct stack_item*)malloc(sizeof(struct stack_item));
+    p = (struct stack_item*)GC_MALLOC(sizeof(struct stack_item));
     p->v = gStackTop->v;
     p->next = gStackTop;
     gStackTop = p;
@@ -47,7 +47,7 @@ void branch(void (*br_true)(void), void(*br_false)(void)){
 }
 void cur(void (*c)(void)){
     struct pair* closure;
-    closure = (struct pair*) malloc(sizeof(struct pair));
+    closure = (struct pair*) GC_MALLOC(sizeof(struct pair));
     closure->first = c;
     closure->second = gStackTop->v;
 
@@ -71,7 +71,7 @@ void op_minus(){
     int a = *((int*)((struct pair*)gStackTop->v)->first);
     int b = *((int*)((struct pair*)gStackTop->v)->second);
 
-    int* intp = (int*) malloc(sizeof(int));
+    int* intp = (int*) GC_MALLOC_ATOMIC(sizeof(int));
     *intp = (a-b);
     gStackTop->v = intp;
 }
@@ -79,7 +79,7 @@ void op_times(){
     int a = *((int*)((struct pair*)gStackTop->v)->first);
     int b = *((int*)((struct pair*)gStackTop->v)->second);
 
-    int* intp = (int*) malloc(sizeof(int));
+    int* intp = (int*) GC_MALLOC_ATOMIC(sizeof(int));
     *intp = (a*b);
     gStackTop->v = intp;
 }
@@ -87,7 +87,7 @@ void op_eq(){
     int a = *((int*)((struct pair*)gStackTop->v)->first);
     int b = *((int*)((struct pair*)gStackTop->v)->second);
 
-    int* intp = (int*) malloc(sizeof(int));
+    int* intp = (int*) GC_MALLOC_ATOMIC(sizeof(int));
     *intp = (a==b);
     gStackTop->v = intp;
 }
@@ -97,7 +97,8 @@ void op_print_int(){
 }
 
 void camInit(){
-    gStackTop = (struct stack_item*) malloc(sizeof(struct stack_item));
+    GC_INIT();
+    gStackTop = (struct stack_item*) GC_MALLOC(sizeof(struct stack_item));
     gStackTop->v = NULL;
     gStackTop->next = NULL;
 }
