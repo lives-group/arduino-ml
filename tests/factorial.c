@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "cam.h"
+#include "../cam.h"
 
 int main(int argc, char** argv){
     camInit();
