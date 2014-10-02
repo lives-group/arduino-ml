@@ -1,5 +1,7 @@
 module Compiler.Core.Syntax where
 
+import Data.Char (chr)
+import Text.PrettyPrint.HughesPJ
 
 -----------------------------------
 --- Definition of the core language syntax
@@ -8,7 +10,7 @@ module Compiler.Core.Syntax where
 data Literal = ILit Int | CLit Char | FLit Float | DLit Double
                deriving (Eq, Ord, Show)
 
-data BOP = ADD | MULT | EQ deriving (Eq, Ord, Show)
+data BOP = ADD | MULT | MINUS | LT | EQ deriving (Eq, Ord, Show)
 
 type Name = String
 
@@ -24,11 +26,25 @@ data Term = Var Name                 -- variables
 -- types
 
 data Ty = Free Name     -- free type variables. Used only by type inference engine
-        | Bound Name    -- bound type variables.
+        | Bound Int     -- bound type variables.
         | TCon Name     -- type constructors
         | TApp Ty Ty    -- type application
         deriving (Eq, Ord, Show)
 
-data Type = Forall [Name] Ty -- type scheme
+data Type = Forall [Int] Ty  -- type scheme
           | Simple Ty        -- simple type
           deriving (Eq, Ord, Show)
+
+-- pretty printer
+
+class Pretty a where
+   pprint :: a -> Doc
+
+instance Pretty Ty where
+   pprint (Free n)   = text n
+   pprint (Bound n)  = text (binders n)
+   pprint (TCon n)   = text n
+   pprint (TApp l r) = empty
+
+binders :: Int -> String
+binders n = [ chr ((n `mod` 26) + 97) ]
