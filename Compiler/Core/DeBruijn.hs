@@ -14,8 +14,8 @@ import Compiler.Core.Primitives
 -----------------------------------
 
 
-convert :: Term -> NTerm
-convert t = fst $ runIdentity (runStateT (convert' t) initialEnv)
+convert :: Term -> (NTerm , Env)
+convert t = runIdentity (runStateT (convert' t) initialEnv)
 
 convert' :: Term -> ConvertM NTerm
 convert' (Var n)
@@ -66,8 +66,6 @@ fromName n
      = do
          (i,env) <- get
          put (i + 1 , n : env)
-
-
 
 
 -- describing syntax using DeBruijn rep.

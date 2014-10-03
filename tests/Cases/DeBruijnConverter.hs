@@ -13,7 +13,7 @@ testdebruijnconverter2 = testconverter t2 t2'
 
 testconverter :: Term -> NTerm -> Assertion
 testconverter t nt
-      = assertEqual "De Bruijn Conversion Result:" nt (convert t)
+      = assertEqual "De Bruijn Conversion Result:" nt (fst $ convert t)
 
 -- values for testing
 
