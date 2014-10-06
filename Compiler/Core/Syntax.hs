@@ -8,7 +8,7 @@ import Text.PrettyPrint.HughesPJ
 --- Definition of the core language syntax
 -----------------------------------
 
-data Literal = ILit Int | CLit Char | FLit Float | DLit Double | Null
+data Literal = ILit Int | CLit Char | DLit Double | Null
                deriving (Eq, Ord, Show)
 
 type Name = String
@@ -50,6 +50,13 @@ data Type = Forall [Int] Ty  -- type scheme
 class Pretty a where
    pprint :: a -> Doc
 
+instance Pretty BOP where
+   pprint ADD  = text "+"
+   pprint MULT = text "*"
+   pprint MINUS = text "-"
+   pprint LT = text "<"
+   pprint EQ = text "="
+
 instance Pretty Ty where
    pprint (Free n)   = text n
    pprint (Bound n)  = text (binders n)
@@ -59,7 +66,6 @@ instance Pretty Ty where
 instance Pretty Literal where
    pprint (ILit i) = int i
    pprint (CLit c) = char c
-   pprint (FLit f) = float f
    pprint (DLit d) = double d
    pprint Null     = int 0
 

@@ -1,4 +1,4 @@
-module Compiler.Core.Tc (typeCheck) where
+module Compiler.Core.Tc (typeCheck, Ctx(..)) where
 
 import Control.Applicative((<$>))
 import Control.Monad.Except
@@ -66,7 +66,6 @@ tc ctx (Let n e e')
 tcLiteral :: Literal -> TcM Ty
 tcLiteral (ILit _) = return tInt
 tcLiteral (CLit _) = return tChar
-tcLiteral (FLit _) = return tFloat
 tcLiteral (DLit _) = return tDouble
 
 tcOp :: B.BOP -> TcM Ty
@@ -152,7 +151,7 @@ v +-> t = [(v,t)]
 
 varBind :: Name -> Ty -> TcM Subst
 varBind v t
-      | v `elem` tv t = return [(v,t)]
+      | v `notElem` tv t = return [(v,t)]
       | otherwise     = occursCheckError v t
 
 unify :: Ty -> Ty -> TcM Subst
