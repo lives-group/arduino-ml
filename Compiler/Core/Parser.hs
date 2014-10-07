@@ -1,9 +1,12 @@
 module Compiler.Core.Parser(parser) where
 
+import Prelude hiding (EQ,LT)
+
 import Data.Functor((<$>))
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language
 import Text.ParserCombinators.Parsec
+import Text.Parsec.Expr
 
 import Compiler.Core.Syntax
 
@@ -26,7 +29,7 @@ abst
      t <- term
      return (Lam v t)
 
-nonApp = var <|> abst <|> letp <|> Const <$> litp <|> parens term
+nonApp = var <|> abst <|> letp <|> Const <$> litp <|> parens term <|> ifp
 
 litp = ILit <$> integer     <|>
        CLit <$> charLiteral <|>
@@ -44,14 +47,30 @@ letp = do
          t' <- term
          return (Let i t t')
 
+ifp = do
+         reserved "if"
+         t <- term
+         reserved "then"
+         t1 <- term
+         reserved "else"
+         t2 <- term
+         return (If t t1 t2)
 
-term = chainl1 nonApp (return App)
+term' = chainl1 nonApp (return App)
+
+term = buildExpressionParser table term'
+       where
+         table = [[ Infix (reservedOp "*" >> return (Op MULT)) AssocLeft],
+                  [ Infix (reservedOp "+" >> return (Op ADD)) AssocLeft,
+                    Infix (reservedOp "-" >> return (Op MINUS)) AssocLeft],
+                  [ Infix (reservedOp "<" >> return (Op LT)) AssocNone,
+                    Infix (reservedOp "==" >> return (Op EQ)) AssocNone]]
 
 -- lexer
 
 charLiteral = P.charLiteral lexer
 float = P.float lexer
-integer = fromInteger <$> P.integer lexer
+integer = fromInteger <$> P.natural lexer
 identifier = P.identifier lexer
 dot = P.dot lexer
 semi = P.semi lexer

@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Monad.Except
 import System.Environment (getArgs)
 
 import Compiler.CAM.Cam
@@ -9,7 +10,7 @@ import Compiler.Core.Parser
 import Compiler.Core.Tc
 import Compiler.Core.DeBruijn
 
-type CompilerM a = Either String a
+type CompilerM a = Either String a --(Except String IO) a
 
 main :: IO ()
 main = getArgs >>= readFile . head >>= compiler

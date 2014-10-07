@@ -59,7 +59,8 @@ tc ctx (If e e' e'')
          return (apply sr t' , sr)
 tc ctx (Let n e e')
       = do
-         (t,s) <- tc ctx e
+         v <- freshVar
+         (t,s) <- tc (ins ctx n (Simple v)) e
          let sig = gen (apply s ctx) (apply s t)
          tc (ins ctx n sig) e'
 
