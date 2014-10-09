@@ -8,20 +8,20 @@ import Prelude hiding (LT,EQ)
 
 import Compiler.Core.Syntax
 import Compiler.Core.Primitives
+import Compiler.Utils.Monad
 
 -----------------------------------
 --- Converting a term to its DeBruijn representation.
 -----------------------------------
 
-
-convert :: Term -> (NTerm , Env)
-convert t = runIdentity (runStateT (convert' t) initialEnv)
+convert :: Term -> PhaseM NTerm
+convert t = convert' t
 
 convert' :: Term -> ConvertM NTerm
 convert' (Var n)
      = do
          env <- gets snd
-         maybe (panicMessage n) (return . NVar) (elemIndex n env)
+         maybe (panicMessage n env) (return . NVar) (elemIndex n env)
 convert' (Const l)
      = return (NConst l)
 convert' (Op op l r)
@@ -34,7 +34,8 @@ convert' (Lam n t)
      = do
          fromName n
          liftM NLam (convert' t)
-convert' (App l r) = liftM2 NApp (convert' l) (convert' r)
+convert' (App l r)
+     = liftM2 NApp (convert' l) (convert' r)
 convert' (If e e' e'')
      = do
          t <- convert' e
@@ -52,14 +53,14 @@ convertOp :: BOP -> ConvertM NTerm
 convertOp op
           = do
               env <- gets snd
-              maybe (panicMessage (show op)) (return . NVar) (elemIndex (show op) env)
+              maybe (panicMessage (show op) env)
+                    (return . NVar)
+                    (elemIndex (show op) env)
 
 
 -- monad definitions
 
-type Env = (Int,[Name])
-
-type ConvertM a = (StateT Env Identity) a
+type ConvertM a = PhaseM a
 
 fromName :: Name -> ConvertM ()
 fromName n
@@ -79,10 +80,9 @@ data NTerm = NVar Index             -- DeBruijn variable
            | NLam NTerm             -- lambda terms
            | NApp NTerm NTerm       -- application
            | NLet NTerm NTerm       -- let expression
-           deriving (Eq, Ord, Show)
-
+           deriving (Eq, Ord)
 
 -- auxiliar functions and error messages
 
-panicMessage :: Name -> a
-panicMessage n = error ("Panic! Undefined variable: " ++ n)
+panicMessage :: Name -> [Name] -> a
+panicMessage n ns = error ("Panic! Undefined variable: " ++ n ++ "\n" ++ concat ns)

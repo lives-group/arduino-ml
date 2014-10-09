@@ -9,6 +9,7 @@ import Text.ParserCombinators.Parsec
 import Text.Parsec.Expr
 
 import Compiler.Core.Syntax
+import Compiler.Utils.Monad
 
 ----------------------------------
 -- Simple parser for the core language
@@ -16,8 +17,8 @@ import Compiler.Core.Syntax
 
 -- parser
 
-parser :: String -> Either String Term
-parser s = either (Left . show) Right (parse term "" s)
+parser :: String -> PhaseM Term
+parser s = either (throwError . show) return (parse term "" s)
 
 var = Var <$> identifier
 

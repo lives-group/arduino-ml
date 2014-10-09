@@ -1,8 +1,10 @@
-module Compiler.Core.Syntax where
+module Compiler.Core.Syntax(module Compiler.Core.Syntax, BOP(..)) where
 
 import Prelude hiding (LT, EQ)
 import Data.Char (chr)
 import Text.PrettyPrint.HughesPJ
+
+import Compiler.Utils.Env
 
 -----------------------------------
 --- Definition of the core language syntax
@@ -10,8 +12,6 @@ import Text.PrettyPrint.HughesPJ
 
 data Literal = ILit Int | CLit Char | DLit Double | Null
                deriving (Eq, Ord, Show)
-
-type Name = String
 
 data Term = Var Name                 -- variables
           | Const Literal            -- literals
@@ -21,17 +21,6 @@ data Term = Var Name                 -- variables
           | If Term Term Term        -- conditionals
           | Let Name Term Term       -- let
           deriving (Eq, Ord, Show)
-
--- operators
-
-data BOP = ADD | MULT | MINUS | LT | EQ deriving (Eq, Ord, Enum)
-
-instance Show BOP where
-   show ADD = "+"
-   show MULT = "*"
-   show MINUS = "-"
-   show LT = "<"
-   show EQ = "=="
 
 -- types
 

@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad.Except
+import Control.Monad.Trans
 import System.Environment (getArgs)
 
 import Compiler.CAM.Cam
@@ -9,19 +10,23 @@ import Compiler.Core.Syntax
 import Compiler.Core.Parser
 import Compiler.Core.Tc
 import Compiler.Core.DeBruijn
+import Compiler.Core.Primitives
 
-type CompilerM a = Either String a --(Except String IO) a
+import Compiler.Utils.Monad
 
 main :: IO ()
 main = getArgs >>= readFile . head >>= compiler
 
-
 compiler :: String -> IO ()
-compiler = either putStrLn (print . pprint) . compile
+compiler s
+       = do
+          r <- run (compile s) initialEnv
+          either print (print . pprint) r
 
-compile :: String -> CompilerM Cam
+compile :: String -> PhaseM Cam
 compile s
     = do
-         r <- parser s
-         t <- typeCheck (Ctx []) r
-         return (generateCamCode (fst $ convert r))
+        t <- parser s
+        ty <- typeCheck (Ctx []) t
+        t' <- convert t
+        generateCamCode t'

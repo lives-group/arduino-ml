@@ -1,6 +1,7 @@
 module Compiler.Core.Tc (typeCheck, Ctx(..)) where
 
 import Control.Applicative((<$>))
+import Control.Monad(liftM)
 import Control.Monad.Except
 import Control.Monad.Identity
 import Control.Monad.State
@@ -10,14 +11,15 @@ import Data.List ((\\))
 import Compiler.Core.Syntax hiding (BOP (..))
 import qualified Compiler.Core.Syntax as B
 import Compiler.Core.Primitives
+import Compiler.Utils.Monad
 
 
 -----------------------------------
 --- Definition of the core language type inference engine
 -----------------------------------
 
-typeCheck :: Ctx -> Term -> Either String Ty
-typeCheck ctx t = either Left (Right . fst . fst) (runTcM (tc ctx t))
+typeCheck :: Ctx -> Term -> TcM Ty
+typeCheck ctx t = liftM fst (tc ctx t)
 
 tc :: Ctx -> Term -> TcM (Ty, Subst)
 tc ctx (Var n)
@@ -170,19 +172,7 @@ unify t t' = differentShapesError t t'
 
 -- type checking monad
 
-type TcM a = (StateT Int (ExceptT String Identity)) a
-
-runTcM :: TcM a -> Either String (a, Int)
-runTcM m = runIdentity (runExceptT (runStateT m 0))
-
--- fresh variable supply
-
-fresh :: TcM Int
-fresh
-   = do
-       v <- get
-       put (v + 1)
-       return v
+type TcM a = PhaseM a
 
 freshVar :: TcM Ty
 freshVar = (Free . toName) <$> fresh

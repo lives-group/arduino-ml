@@ -55,10 +55,3 @@ tLT = tInt ->> tInt ->> tBool
 
 tEQ :: Ty
 tEQ = tInt ->> tInt ->> tBool
-
--- initial environment for DeBruijn translation
-
-initialEnv :: (Int, [Name])
-initialEnv = (length ops, ops)
-             where
-                ops = map show [ADD .. EQ]
