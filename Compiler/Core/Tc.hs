@@ -37,7 +37,7 @@ tc ctx (Op b l r)
          v <- freshVar
          s'' <- unify (t ->> t' ->> v) top
          return (apply s'' v, s'' @@ s' @@ s)
-tc ctx (Lam n t)
+n n tc ctx (Lam n t)
      = do
           v <- freshVar
           (t', s) <- tc (ins ctx n (Simple v)) t

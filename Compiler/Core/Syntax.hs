@@ -1,4 +1,5 @@
-module Compiler.Core.Syntax(module Compiler.Core.Syntax, BOP(..)) where
+module Compiler.Core.Syntax(module Compiler.Core.Syntax, BOP(..),
+                            module Text.PrettyPrint.HughesPJ) where
 
 import Prelude hiding (LT, EQ)
 import Data.Char (chr)
